@@ -18,7 +18,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   DateTime? _selectedStartDate;
   DateTime? _selectedEndDate;
   double _totalSelectedPurchases =
-      0.0; // Variable for selected date range Purchases
+  0.0; // Variable for selected date range Purchases
 
   @override
   void initState() {
@@ -32,9 +32,10 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     final today = DateTime.now();
     _totalDailyPurchases = purchaseHistory
         .where((purchase) =>
-            purchase['purchaseDate'].day == today.day &&
-            purchase['purchaseDate'].month == today.month &&
-            purchase['purchaseDate'].year == today.year)
+    purchase['purchaseDate'] != null && // Add null check
+        purchase['purchaseDate'].day == today.day &&
+        purchase['purchaseDate'].month == today.month &&
+        purchase['purchaseDate'].year == today.year)
         .fold(0.0, (sum, purchase) => sum + purchase['totalAmount']);
   }
 
@@ -56,17 +57,18 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
       _searchQuery = query.toLowerCase();
       _filteredPurchases = purchaseHistory
           .where((purchase) =>
-              purchase['name'].toLowerCase().contains(_searchQuery))
+      purchase['name'] != null &&
+          purchase['name'].toLowerCase().contains(_searchQuery))
           .toList();
     });
   }
 
   void _selectDateRange() async {
     DateTime? endDate = await _selectDate(context);
-    if (endDate != null) return;
+    if (endDate == null) return;
 
     DateTime? startDate = await _selectDate(context);
-    if (startDate != null) return;
+    if (startDate == null) return;
 
     setState(() {
       _selectedEndDate = endDate;
@@ -89,10 +91,11 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     if (_selectedStartDate != null && _selectedEndDate != null) {
       _totalSelectedPurchases = purchaseHistory
           .where((purchase) =>
-              purchase['purchaseDate']
-                  .isAfter(_selectedStartDate!.subtract(Duration(days: 1))) &&
-              purchase['purchaseDate']
-                  .isBefore(_selectedEndDate!.add(Duration(days: 1))))
+      purchase['purchaseDate'] != null && // Add null check
+          purchase['purchaseDate']
+              .isAfter(_selectedStartDate!.subtract(Duration(days: 1))) &&
+          purchase['purchaseDate']
+              .isBefore(_selectedEndDate!.add(Duration(days: 1))))
           .fold(0.0, (sum, purchase) => sum + purchase['totalAmount']);
     }
   }
@@ -173,55 +176,57 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
           Expanded(
             child: _filteredPurchases.isEmpty
                 ? Center(
-                    child: Text('কোন তথ্য পাওয়া যায় নি'),
-                  )
+              child: Text('কোন তথ্য পাওয়া যায় নি'),
+            )
                 : ListView.builder(
-                    itemCount: _filteredPurchases.length,
-                    itemBuilder: (context, index) {
-                      final supplier = _filteredPurchases[index];
-                      return Card(
-                        margin: EdgeInsets.all(10),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'সাপ্লায়ার: ${supplier['name']}',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                'তারিখ: ${DateFormat('dd-MM-yyyy').format(supplier['PurchaseDate'])}',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                'সর্বমোট মূল্য: ৳${supplier['totalAmount'].toStringAsFixed(2)}',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                'প্রোডাক্ট:',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              for (var product in supplier['products'])
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${product['productName']} - ৳${product['productPrice'].toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                            ],
-                          ),
+              itemCount: _filteredPurchases.length,
+              itemBuilder: (context, index) {
+                final supplier = _filteredPurchases[index];
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'সাপ্লায়ার: ${supplier['name']}',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                      );
-                    },
+                        SizedBox(height: 5),
+                        Text(
+                          supplier['purchaseDate'] != null
+                              ? 'তারিখ: ${DateFormat('dd-MM-yyyy').format(supplier['purchaseDate'])}'
+                              : 'তারিখ: না',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'সর্বমোট মূল্য: ৳${supplier['totalAmount'].toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'প্রোডাক্ট:',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        for (var product in supplier['products'])
+                          Padding(
+                            padding:
+                            const EdgeInsets.symmetric(vertical: 5),
+                            child: Text(
+                              '${product['productName']} - ৳${product['productPrice'].toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
+                );
+              },
+            ),
           ),
         ],
       ),

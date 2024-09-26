@@ -24,24 +24,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width; // Get screen width
+    var screenHeight = MediaQuery.of(context).size.height; // Get screen height
+
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white, // Changed background color to white
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(209, 255, 98, 0),
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('হাতুড়ে স্টোর',
-                style: TextStyle(color: Colors.black, fontSize: 20)),
-            Text('সর্বশেষ ব্যাকআপঃ',
-                style: TextStyle(color: Colors.black54, fontSize: 15)),
+            Text(
+              'হাতুড়ে স্টোর',
+              style: TextStyle(color: Colors.black, fontSize: screenWidth * 0.05), // Font size based on screen width
+            ),
+            Text(
+              'সর্বশেষ ব্যাকআপঃ',
+              style: TextStyle(color: Colors.black54, fontSize: screenWidth * 0.035),
+            ),
           ],
         ),
         actions: [
-          Icon(Icons.notifications_none, color: Colors.black),
-          SizedBox(width: 10),
+          Icon(Icons.notifications_none, color: Colors.black, size: screenWidth * 0.07),
+          SizedBox(width: screenWidth * 0.03),
         ],
       ),
       drawer: _buildDrawer(),
@@ -50,17 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date and Backup Info Section
-            _buildDateAndBackupSection(),
-            SizedBox(height: 20),
-            // Summary Card Section (Today's Sales, Profit, etc.)
-            _buildSummaryCardSection(),
-            SizedBox(height: 20),
-            // Actions Grid Section
-            _buildActionGrid(context),
-            SizedBox(height: 20),
-            // Support and Call Button Section
-            _buildSupportSection(),
+            _buildLargeActionButtons(context, screenWidth, screenHeight), // Replaced the Date and Backup section
+            SizedBox(height: screenHeight * 0.02),
+            _buildSummaryCardSection(screenWidth),
+            SizedBox(height: screenHeight * 0.02),
+            _buildActionGrid(context, screenWidth, screenHeight),
+            SizedBox(height: screenHeight * 0.02),
+            _buildSupportSection(screenWidth),
           ],
         ),
       ),
@@ -78,9 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 _showEditNameDialog();
               },
-              child: Text(_name),
+              child: Text(_name, style: TextStyle(fontSize: 20)),
             ),
-            accountEmail: Text('মোবাইলঃ $_mobile'),
+            accountEmail: Text('মোবাইলঃ $_mobile', style: TextStyle(fontSize: 16)),
             currentAccountPicture: GestureDetector(
               onTap: () {
                 _pickImage();
@@ -97,21 +100,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: Icon(Icons.lock),
-            title: Text('পাসওয়ার্ড পরিবর্তন'),
+            title: Text('পাসওয়ার্ড পরিবর্তন', style: TextStyle(fontSize: 18)),
             onTap: () {
               // Handle password change action
             },
           ),
           ListTile(
             leading: Icon(Icons.refresh),
-            title: Text('পাসওয়ার্ড রিসেট'),
+            title: Text('পাসওয়ার্ড রিসেট', style: TextStyle(fontSize: 18)),
             onTap: () {
               // Handle password reset action
             },
           ),
           ListTile(
             leading: Icon(Icons.logout),
-            title: Text('লগ আউট'),
+            title: Text('লগ আউট', style: TextStyle(fontSize: 18)),
             onTap: () {
               // Handle log out action
             },
@@ -132,12 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showEditNameDialog() {
     final TextEditingController nameController =
-        TextEditingController(text: _name);
+    TextEditingController(text: _name);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('নাম পরিবর্তন করুন'),
+          title: Text('নাম পরিবর্তন করুন', style: TextStyle(fontSize: 20)),
           content: TextField(
             controller: nameController,
             decoration: InputDecoration(hintText: "নতুন নাম লিখুন"),
@@ -158,48 +161,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Section 1: Date and Backup Section
-  Widget _buildDateAndBackupSection() {
-    return Card(
-      color: Colors.green[100],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            Icon(Icons.security, size: 40, color: Colors.green),
-            SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ব্যাবসার পরিস্থিতি প্রিমিয়াম',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                      'আজকের তারিখঃ ${DateTime.now().toString().substring(0, 10)}',
-                      style: TextStyle(fontSize: 20)),
-                  SizedBox(height: 5),
-                  Text(
-                    'ক্লিক করে আপগ্রেড করুন',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                ],
-              ),
+  // Section 1: Large Action Buttons for 'ক্রয়' and 'বিক্রয়'
+  Widget _buildLargeActionButtons(
+      BuildContext context, double screenWidth, double screenHeight) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildLargeActionButton(Icons.shopping_cart, 'ক্রয়', context, Colors.brown, screenWidth, screenHeight),
+        _buildLargeActionButton(Icons.shopping_bag, 'বিক্রয়', context, Colors.indigo, screenWidth, screenHeight),
+      ],
+    );
+  }
+
+  Widget _buildLargeActionButton(IconData icon, String label, BuildContext context, Color color,
+      double screenWidth, double screenHeight) {
+    // Define custom background colors for 'ক্রয়' and 'বিক্রয়'
+    Color backgroundColor = (label == 'ক্রয়') ? Colors.brown[100]! : Colors.indigo[100]!;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          if (label == 'ক্রয়') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddSuppliersPage()),
+            );
+          } else if (label == 'বিক্রয়') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddCustomersPage()),
+            );
+          }
+        },
+        child: Card(
+          color: backgroundColor, // Set background color dynamically
+          elevation: 5,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+            child: Column(
+              children: [
+                Icon(icon, size: screenWidth * 0.15, color: color),
+                SizedBox(height: screenHeight * 0.01),
+                Text(label, style: TextStyle(fontSize: screenWidth * 0.05, color: color)),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('বিস্তারিত'),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
+
   // Section 2: Summary Card Section
-  Widget _buildSummaryCardSection() {
+  Widget _buildSummaryCardSection(double screenWidth) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -210,17 +225,20 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSummaryItem('আজকের বিক্রি', '৳ 0', true),
-                _buildSummaryItem('আজকের লাভ', '৳ 0', false),
-                _buildSummaryItem('আজকের বাকি', '৳ 0', false),
+                _buildSummaryItem('আজকের বিক্রি', '৳ 0', true, screenWidth),
+                _buildSummaryItem('আজকের লাভ', '৳ 0', false, screenWidth),
+                _buildSummaryItem('আজকের বাকি', '৳ 0', false, screenWidth),
               ],
             ),
             Divider(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSummaryItem('স্টক সংখ্যা', '0', false),
-                ElevatedButton(onPressed: () {}, child: Text('স্টক আপগ্রেড')),
+                _buildSummaryItem('স্টক সংখ্যা', '0', false, screenWidth),
+                ElevatedButton(
+                    onPressed: () {},
+                    child: Text('স্টক আপগ্রেড',
+                        style: TextStyle(fontSize: screenWidth * 0.04))),
               ],
             ),
           ],
@@ -229,20 +247,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSummaryItem(String title, String value, bool isPrimary) {
+  Widget _buildSummaryItem(
+      String title, String value, bool isPrimary, double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style: TextStyle(
-              fontSize: 20, color: isPrimary ? Colors.black : Colors.black54),
+              fontSize: screenWidth * 0.045,
+              color: isPrimary ? Colors.black : Colors.black54),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: screenWidth * 0.02),
         Text(
           value,
           style: TextStyle(
-              fontSize: 25,
+              fontSize: screenWidth * 0.06,
               fontWeight: FontWeight.bold,
               color: isPrimary ? Colors.blue : Colors.black),
         ),
@@ -251,76 +271,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Section 3: Action Grid Section
-  Widget _buildActionGrid(BuildContext context) {
+  Widget _buildActionGrid(
+      BuildContext context, double screenWidth, double screenHeight) {
     return GridView.count(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       crossAxisCount: 4,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
+      crossAxisSpacing: screenWidth * 0.02,
+      mainAxisSpacing: screenHeight * 0.02,
       children: [
-        _buildActionButton(Icons.shopping_cart, 'ক্রয়', context, Colors.orange),
-        _buildActionButton(Icons.shopping_bag, 'বিক্রয়', context, Colors.blue),
-        _buildActionButton(Icons.book, 'ক্রয় সমূহ', context, Colors.red),
-        _buildActionButton(
-            Icons.account_balance_wallet, 'বিক্রয় সমূহ', context, Colors.green),
-        _buildActionButton(
-            Icons.attach_money, 'খরচের হিসাব', context, Colors.purple),
-        _buildActionButton(Icons.people, 'সকল পার্টি', context, Colors.pink),
-        _buildActionButton(
-            Icons.inventory, 'প্রোডাক্ট লিস্ট', context, Colors.teal),
-        _buildActionButton(
-            Icons.stacked_bar_chart, 'স্টকের হিসাব', context, Colors.yellow),
-        _buildActionButton(
-            Icons.report, 'ব্যবসার রিপোর্ট', context, Colors.brown),
-        _buildActionButton(Icons.print, 'প্রিন্ট', context, Colors.indigo),
-        _buildActionButton(
-            Icons.payment, 'ডিজিটাল পেমেন্ট', context, Colors.cyan),
+        _buildActionButton(Icons.shelves, 'ক্রয়সমূহ', context, Colors.brown, screenWidth),
+        _buildActionButton(Icons.shopping_cart_checkout, 'বিক্রয় সমূহ', context, Colors.indigo, screenWidth),
+        _buildActionButton(Icons.store, 'স্টকের হিসাব', context, Colors.teal, screenWidth),
+        _buildActionButton(Icons.people, 'সকল পার্টি', context, Colors.pink, screenWidth),
+        _buildActionButton(Icons.report, 'বিক্রয় রিপোর্ট', context, Colors.amber, screenWidth),
+        _buildActionButton(Icons.pie_chart, 'লাভ রিপোর্ট', context, Colors.blue, screenWidth),
+        _buildActionButton(Icons.credit_card, 'লোন সমূহ', context, Colors.deepPurple, screenWidth),
+        _buildActionButton(Icons.money, 'ইনভয়েস', context, Colors.cyan, screenWidth),
+        _buildActionButton(Icons.history, 'প্রোডাক্ট লিস্ট', context, Colors.green, screenWidth), // New 'ক্রয়সমূহ' button
+        _buildActionButton(Icons.settings, 'সেটিংস', context, Colors.grey, screenWidth),
       ],
     );
   }
 
-  Widget _buildActionButton(
-      IconData icon, String label, BuildContext context, Color color) {
+  Widget _buildActionButton(IconData icon, String label, BuildContext context,
+      Color color, double screenWidth) {
+    double iconSize = screenWidth * 0.08; // Dynamically calculate icon size
+    double radius = screenWidth * 0.075; // Dynamically calculate radius
+    double fontSize = screenWidth * 0.035; // Dynamically calculate font size
+
     return InkWell(
       onTap: () {
-        if (label == 'বিক্রয়') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddCustomersPage()),
-          );
-        }
-        if (label == 'ক্রয়') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddSuppliersPage()),
-          );
-        }
-        if (label == 'ক্রয় সমূহ') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => PurchaseHistoryPage()),
-          );
-        }
         if (label == 'বিক্রয় সমূহ') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SaleHistoryPage()),
           );
-        }
-        if (label == 'প্রোডাক্ট লিস্ট') {
+        } else if (label == 'ক্রয়সমূহ') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PurchaseHistoryPage()), // Navigate to Purchase History Page
+          );
+        } else if (label == 'প্রোডাক্ট লিস্ট') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ProductPage()),
           );
-        }
-        if (label == 'স্টকের হিসাব') {
+        } else if (label == 'স্টকের হিসাব') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => StockManagementPage()),
           );
-        }
-        if (label == 'সকল পার্টি') {
+        } else if (label == 'সকল পার্টি') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ContactManagementPage()),
@@ -336,48 +338,44 @@ class _HomeScreenState extends State<HomeScreen> {
             color: color.withOpacity(0.2),
             child: CircleAvatar(
               backgroundColor: color.withOpacity(0.5),
-              radius: 35,
-              child: Icon(icon, size: 45, color: Colors.white),
+              radius: radius, // Dynamic radius
+              child: Icon(icon, size: iconSize, color: Colors.white), // Dynamic icon size
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20),
+          SizedBox(height: screenWidth * 0.02), // Adjust spacing dynamically
+          Flexible(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: fontSize), // Dynamic font size
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Section 4: Support and Call Button Section
-  Widget _buildSupportSection() {
+  // Section 4: Support Section
+  Widget _buildSupportSection(double screenWidth) {
     return Column(
       children: [
         Card(
           color: Colors.blue[100],
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'যেকোনো প্রয়োজনে যোগাযোগ করুন',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.phone),
-                  label: Text('০১৫৫৮৯৯৩৩৪১'),
-                ),
-              ],
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: ListTile(
+            leading: Icon(Icons.support, color: Colors.blue),
+            title: Text(
+              'সাপোর্টের জন্য ফোন করুন',
+              style: TextStyle(fontSize: screenWidth * 0.05),
             ),
+            trailing: Icon(Icons.arrow_forward_ios, size: screenWidth * 0.05),
+            onTap: () {
+              // Handle support action
+            },
           ),
         ),
-        SizedBox(height: 10),
+        SizedBox(height: screenWidth * 0.05),
       ],
     );
   }
